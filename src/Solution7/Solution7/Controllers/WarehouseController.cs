@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Solution7.Models;
 using Solution7.Services;
 using System;
+using System.Threading.Tasks; // Ensure this namespace is included for Task
 
 namespace Solution7.Controllers
 {
@@ -9,29 +10,31 @@ namespace Solution7.Controllers
     [Route("[controller]")]
     public class WarehouseController : ControllerBase
     {
-        private readonly WarehouseService _warehouseService;
+        private readonly IWarehouseService _warehouseService;
 
-        public WarehouseController(WarehouseService warehouseService)
+        public WarehouseController(IWarehouseService warehouseService)
         {
             _warehouseService = warehouseService;
         }
 
         [HttpPost("add-product-to-warehouse")]
-        public IActionResult AddProductToWarehouse([FromBody] ProductWarehouseDto productWarehouse)
+        public async Task<IActionResult> AddProductToWarehouse([FromBody] ProductWarehouseDto productWarehouse)
         {
             try
             {
-                if (!_warehouseService.ValidateProductAndWarehouse(productWarehouse.IdProduct, productWarehouse.IdWarehouse))
+                // Await the asynchronous method and use it in the condition
+                if (!await _warehouseService.ValidateProductAndWarehouse(productWarehouse.IdProduct, productWarehouse.IdWarehouse))
                 {
                     return BadRequest("Invalid product or warehouse ID.");
                 }
 
-                if (!_warehouseService.CheckOrderValidity(productWarehouse.IdProduct, productWarehouse.Amount, productWarehouse.CreatedAt))
+                if (!await _warehouseService.CheckOrderValidity(productWarehouse.IdProduct, productWarehouse.Amount, productWarehouse.CreatedAt))
                 {
                     return BadRequest("No valid order found for this product.");
                 }
 
-                int recordId = _warehouseService.UpdateDatabase(productWarehouse);
+                // Await the async method to get the record ID
+                int recordId = await _warehouseService.UpdateDatabase(productWarehouse);
                 return Ok(new { RecordId = recordId });
             }
             catch (Exception ex)

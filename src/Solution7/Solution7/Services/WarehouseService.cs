@@ -1,31 +1,37 @@
 using Solution7.Models;
-using System;
+using Solution7.Repositories;
+using System.Threading.Tasks;
 
 namespace Solution7.Services
 {
-    public class WarehouseService
+    public class WarehouseService : IWarehouseService
     {
-        public WarehouseService()
+        private readonly IProductRepository _productRepository;
+        private readonly IWarehouseRepository _warehouseRepository;
+        private readonly IOrderRepository _orderRepository;
+
+        public WarehouseService(IProductRepository productRepository, IWarehouseRepository warehouseRepository, IOrderRepository orderRepository)
         {
-            
+            _productRepository = productRepository;
+            _warehouseRepository = warehouseRepository;
+            _orderRepository = orderRepository;
         }
 
-        public bool ValidateProductAndWarehouse(int productId, int warehouseId)
+        public async Task<bool> ValidateProductAndWarehouse(int productId, int warehouseId)
         {
-            
-            return true; 
+            bool productExists = await _productRepository.Exists(productId);
+            bool warehouseExists = await _warehouseRepository.Exists(warehouseId);
+            return productExists && warehouseExists;
         }
 
-        public bool CheckOrderValidity(int productId, int amount, DateTime createdAt)
+        public async Task<bool> CheckOrderValidity(int productId, int amount, DateTime createdAt)
         {
-           
-            return true; 
+            return await _orderRepository.IsValidOrder(productId, amount, createdAt);
         }
 
-        public int UpdateDatabase(ProductWarehouseDto productWarehouse)
+        public async Task<int> UpdateDatabase(ProductWarehouseDto productWarehouse)
         {
-           
-            return 1; 
+            return await _orderRepository.ProcessOrder(productWarehouse);
         }
     }
 }
