@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration; // Ensure this namespace is included for configuration access
-using Solution7.Repositories; // Assuming your repository interfaces and implementations are in this namespace
-using Solution7.Services; // Ensure this namespace contains your service interfaces and implementations
+using Microsoft.Extensions.Configuration; 
+using Solution7.Repositories; 
+using Solution7.Services; 
 
 var builder = WebApplication.CreateBuilder(args);
 

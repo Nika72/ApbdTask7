@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Solution7.Models;
 using Solution7.Services;
 using System;
-using System.Threading.Tasks; // Ensure this namespace is included for Task
+using System.Threading.Tasks;
 
 namespace Solution7.Controllers
 {
@@ -22,7 +22,6 @@ namespace Solution7.Controllers
         {
             try
             {
-                // Await the asynchronous method and use it in the condition
                 if (!await _warehouseService.ValidateProductAndWarehouse(productWarehouse.IdProduct, productWarehouse.IdWarehouse))
                 {
                     return BadRequest("Invalid product or warehouse ID.");
@@ -33,9 +32,26 @@ namespace Solution7.Controllers
                     return BadRequest("No valid order found for this product.");
                 }
 
-                // Await the async method to get the record ID
                 int recordId = await _warehouseService.UpdateDatabase(productWarehouse);
                 return Ok(new { RecordId = recordId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
+        [HttpPost("add-product-to-warehouse-via-procedure")]
+        public async Task<IActionResult> AddProductToWarehouseViaProcedure([FromBody] ProductWarehouseDto productWarehouse)
+        {
+            try
+            {
+                int recordId = await _warehouseService.ExecuteProductWarehouseProcedure(productWarehouse);
+                if (recordId > 0)
+                {
+                    return Ok(new { RecordId = recordId });
+                }
+                return BadRequest("Unable to process the request.");
             }
             catch (Exception ex)
             {
